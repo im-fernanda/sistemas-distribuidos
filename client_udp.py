@@ -1,7 +1,7 @@
 import socket
 import time
 
-def udp_client(host='127.0.0.1', port=5005, n_packets=20, packet_size=1024, max_retries=3):
+def udp_client(host='127.0.0.1', port=5005, n_packets=5, packet_size=1024, max_retries=3):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (host, port)
     client_socket.settimeout(2.0)  # Define timeout para receber ACK
