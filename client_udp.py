@@ -64,5 +64,4 @@ def udp_client(host='127.0.0.1', port=5005, n_packets=20, packet_size=1024, max_
         client_socket.close()
 
 if __name__ == "__main__":
-    # Substitua 'servidor_ip' pelo IP real do servidor
     udp_client(host='127.0.0.1', n_packets=20, packet_size=1024)
