@@ -12,7 +12,6 @@ def tcp_client(host='127.0.0.1', port=65432, n_packets=5, packet_size=1024):
         # Envia informação sobre quantos pacotes serão enviados
         s.sendall(f"{n_packets}".encode())
         
-        # Pequena pausa para garantir que o servidor processou a informação
         time.sleep(0.1)
         
         # Envia os pacotes sem esperar por confirmação explícita
