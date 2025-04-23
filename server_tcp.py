@@ -22,7 +22,6 @@ def tcp_server(host='0.0.0.0', port=65432):
             n_packets = int(data.decode())
             print(f"Esperando {n_packets} pacotes")
             
-            # Recebe os pacotes sem enviar confirmação explícita
             packets_received = 0
             
             while packets_received < n_packets:

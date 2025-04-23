@@ -37,7 +37,7 @@ def udp_server(host='0.0.0.0', port=5005):
                         ack_message = f"ACK:{packet_id}".encode()
                         server_socket.sendto(ack_message, addr)
                 
-                print(f"Todos os {n_packets} pacotes recebidos de {addr}")
+                print(f"Foram recebidos {n_packets} pacotes recebidos de {addr}")
             
         except Exception as e:
             print(f"Erro: {e}")
