@@ -1,6 +1,6 @@
 import socket
 import time
-
+import json, random
 
 def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -27,13 +27,31 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
             print("Timeout ao aguardar confirmação das informações. Encerrando.")
             return
 
-        # Cria um pacote de dados com o tamanho especificado
-        packet_data = b"X" * packet_size
-
-        # Envia os N pacotes
         for i in range(n_packets):
-            # Adiciona um cabeçalho com o número do pacote
-            packet_with_header = f"{i+1}:".encode() + packet_data
+            # Dicionário com dados variados
+            data_dict = {
+                "timestamp": time.time(),
+                "message": f"Este é o pacote número {i+1}",
+                "random_value": random.randint(1, 1000),
+                "client_info": {
+                    "hostname": socket.gethostname(),
+                    "local_time": time.strftime("%Y-%m-%d %H:%M:%S")
+                }
+            }
+
+            # Converte para JSON
+            json_data = json.dumps(data_dict)
+
+            # Ajusta o tamanho
+            if len(json_data) > packet_size:
+                json_data = json_data[:packet_size]
+            else:
+                # Preenche com espaços 
+                json_data = json_data.ljust(packet_size)
+
+            # Envia os N pacotes
+
+            packet_with_header = f"{i+1}:".encode() + json_data.encode()
 
             client_socket.sendto(packet_with_header, server_address)
             print(f"Pacote {i+1}/{n_packets} enviado ({packet_size} bytes)")
@@ -56,7 +74,7 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
 
             time.sleep(0.01) 
 
-        print(f"Processo de envio de {n_packets} pacotes concluído")
+            print(f"Processo de envio de {n_packets} pacotes concluído")
 
     finally:
         client_socket.close()

@@ -25,7 +25,7 @@ def udp_server(host="0.0.0.0", port=5005):
                 server_socket.sendto("ACK:INFO".encode(), addr)
 
                 # Define um timeout para receber pacotes
-                server_socket.settimeout(5.0)  # 5 segundos de timeout
+                server_socket.settimeout(5.0)
 
                 # Contador real de pacotes recebidos
                 packets_received = 0
@@ -47,6 +47,18 @@ def udp_server(host="0.0.0.0", port=5005):
                             print(
                                 f"Recebido pacote {packet_id}/{n_packets} de {addr} ({len(data)} bytes)"
                             )
+                            # Tenta imprimir o conteúdo da mensagem
+                            try:
+                                # Tenta decodificar como texto, se possível
+                                message_content = data.decode("utf-8")
+                                print(
+                                    f"Conteúdo do pacote {packet_id}: {message_content[:50]}..."
+                                )
+                            except UnicodeDecodeError:
+                                # Se não for texto decodificável, mostra os primeiros bytes
+                                print(
+                                    f"Conteúdo do pacote {packet_id} (bytes): {data[:20]}..."
+                                )
 
                             # Envia ACK para este pacote
                             ack_message = f"ACK:{packet_id}".encode()
