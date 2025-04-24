@@ -1,6 +1,6 @@
 import socket
 import time
-import json, random
+import json
 
 
 def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
@@ -97,4 +97,4 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
 
 
 if __name__ == "__main__":
-    udp_client(host="127.0.0.1", n_packets=20, packet_size=1024)
+    udp_client(host="127.0.0.1", n_packets=1, packet_size=60000)

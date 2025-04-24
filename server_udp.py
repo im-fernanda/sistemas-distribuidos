@@ -49,7 +49,7 @@ def udp_server(host="0.0.0.0", port=5005):
                             )
                             # Tenta imprimir o conteúdo da mensagem
                             try:
-                                # Tenta decodificar como texto, se possível
+
                                 message_content = data.decode("utf-8")
                                 print(
                                     f"Conteúdo do pacote {packet_id}: {message_content[:50]}..."
