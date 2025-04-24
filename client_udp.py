@@ -70,6 +70,8 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
                     and ack_parts[1] == str(i + 1)
                 ):
                     print(f"Servidor confirmou recebimento do pacote {i+1}/{n_packets}")
+                    # Adiciona ao conjunto de pacotes recebidos se a confirmação for correta
+                    received_packets.add(i + 1)
                 else:
                     print(f"Recebida confirmação incorreta: {ack.decode()}")
             except socket.timeout:
