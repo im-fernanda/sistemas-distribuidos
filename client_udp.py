@@ -2,6 +2,7 @@ import socket
 import time
 import json, random
 
+
 def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (host, port)
@@ -27,16 +28,19 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
             print("Timeout ao aguardar confirmação das informações. Encerrando.")
             return
 
+        start_time = time.time()  # Inicia o cronômetro
+        packets_lost = 0  # Contador de pacotes perdidos
+        retransmissions = 0  # Contador de retransmissões
+        received_packets = set()  # Conjunto para verificar ordem de entrega
+
+        # Envia os N pacotes
         for i in range(n_packets):
             # Dicionário com dados variados
             data_dict = {
-                "timestamp": time.time(),
-                "message": f"Este é o pacote número {i+1}",
-                "random_value": random.randint(1, 1000),
+                "message": f"Pacote{i+1}",
                 "client_info": {
-                    "hostname": socket.gethostname(),
-                    "local_time": time.strftime("%Y-%m-%d %H:%M:%S")
-                }
+                    "local_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+                },
             }
 
             # Converte para JSON
@@ -46,11 +50,10 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
             if len(json_data) > packet_size:
                 json_data = json_data[:packet_size]
             else:
-                # Preenche com espaços 
+                # Preenche com espaços
                 json_data = json_data.ljust(packet_size)
 
-            # Envia os N pacotes
-
+            # Adiciona um cabeçalho com o número do pacote
             packet_with_header = f"{i+1}:".encode() + json_data.encode()
 
             client_socket.sendto(packet_with_header, server_address)
@@ -72,9 +75,20 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
             except socket.timeout:
                 print(f"Timeout ao aguardar confirmação do pacote {i+1}")
 
-            time.sleep(0.01) 
+            time.sleep(0.01)
+        end_time = time.time()  # Termina o cronômetro
+        total_time = end_time - start_time
+        data_transferred = (
+            n_packets * packet_size * 8 / 1e6
+        )  # Dados transferidos em Megabits
+        transmission_rate = data_transferred / total_time  # Taxa de transmissão em Mbps
 
-            print(f"Processo de envio de {n_packets} pacotes concluído")
+        print(f"Taxa de transmissão: {transmission_rate:.2f} Mbps")
+        print(f"Pacotes perdidos: {packets_lost}")
+        print(f"Retransmissões: {retransmissions}")
+        print(f"Pacotes recebidos fora de ordem: {n_packets - len(received_packets)}")
+
+        print(f"Processo de envio de {n_packets} pacotes concluído")
 
     finally:
         client_socket.close()
