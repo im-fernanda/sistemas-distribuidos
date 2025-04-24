@@ -80,9 +80,7 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
             time.sleep(0.01)
         end_time = time.time()  # Termina o cronômetro
         total_time = end_time - start_time
-        data_transferred = (
-            n_packets * packet_size * 8 / 1e6
-        )  # Dados transferidos em Megabits
+        data_transferred = ( n_packets * packet_size * 8 / 1e6)  # Dados transferidos em Megabits
         transmission_rate = data_transferred / total_time  # Taxa de transmissão em Mbps
 
         print(f"Taxa de transmissão: {transmission_rate:.2f} Mbps")
@@ -97,4 +95,10 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
 
 
 if __name__ == "__main__":
-    udp_client(host="127.0.0.1", n_packets=1, packet_size=60000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=1000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=10000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=20000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=30000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=40000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=50000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=60000)

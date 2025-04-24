@@ -56,5 +56,5 @@ def tcp_client(host="127.0.0.1", port=65432, n_packets=5, packet_size=1024):
 
 
 if __name__ == "__main__":
-    tcp_client(n_packets=1, packet_size=1024)
+    tcp_client(n_packets=5, packet_size=60000)
  
