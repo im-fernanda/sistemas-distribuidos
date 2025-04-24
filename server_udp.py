@@ -1,4 +1,5 @@
 import socket
+import time
 
 
 def udp_server(host="0.0.0.0", port=5005):
@@ -29,6 +30,9 @@ def udp_server(host="0.0.0.0", port=5005):
 
                 # Contador real de pacotes recebidos
                 packets_received = 0
+                received_ids = set()  # Conjunto para verificar ordem de entrega
+                retransmissions = 0  # Contador de retransmissões
+                start_time = time.time()  # Inicia o cronômetro
 
                 # Recebe os pacotes
                 try:
@@ -48,6 +52,12 @@ def udp_server(host="0.0.0.0", port=5005):
                                 f"Recebido pacote {packet_id}/{n_packets} de {addr} ({len(data)} bytes)"
                             )
 
+                            # Verifica se o pacote já foi recebido
+                            if packet_id in received_ids:
+                                retransmissions += 1
+                            else:
+                                received_ids.add(packet_id)
+
                             # Envia ACK para este pacote
                             ack_message = f"ACK:{packet_id}".encode()
                             server_socket.sendto(ack_message, addr)
@@ -66,6 +76,16 @@ def udp_server(host="0.0.0.0", port=5005):
                         print(
                             f"Recebidos apenas {packets_received}/{n_packets} pacotes de {addr}"
                         )
+
+                    end_time = time.time()  # Termina o cronômetro
+                    total_time = end_time - start_time
+                    data_transferred = packets_received * packet_size * 8 / 1e6  # Dados transferidos em Megabits
+                    transmission_rate = data_transferred / total_time  # Taxa de transmissão em Mbps
+                    
+                    print(f"Taxa de transmissão: {transmission_rate:.2f} Mbps")
+                    print(f"Pacotes perdidos: {n_packets - packets_received}")
+                    print(f"Retransmissões: {retransmissions}")
+                    print(f"Pacotes recebidos fora de ordem: {n_packets - len(received_ids)}")
 
         except Exception as e:
             print(f"Erro: {e}")

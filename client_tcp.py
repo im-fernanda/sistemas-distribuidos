@@ -14,13 +14,22 @@ def tcp_client(host='127.0.0.1', port=65432, n_packets=5, packet_size=1024):
         
         time.sleep(0.1)
         
+        start_time = time.time()  # Inicia o cronômetro
+        
         # Envia os pacotes sem esperar por confirmação explícita
         for i in range(n_packets):
             s.sendall(packet)
             print(f"Pacote {i+1}/{n_packets} enviado ({packet_size} bytes)")
  
             time.sleep(0.01)
-            
+        
+        end_time = time.time()  # Termina o cronômetro
+        total_time = end_time - start_time
+        data_transferred = n_packets * packet_size * 8 / 1e6  # Dados transferidos em Megabits
+        transmission_rate = data_transferred / total_time  # Taxa de transmissão em Mbps
+        
+        print(f"Taxa de transmissão: {transmission_rate:.2f} Mbps")
+        
     print(f"Todos os {n_packets} pacotes foram enviados")
 
 
