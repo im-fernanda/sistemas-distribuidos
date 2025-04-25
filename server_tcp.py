@@ -5,24 +5,24 @@ import sys
 def iniciar_servidor(servidor_host='', servidor_porta=12345, timeout_inativo=10):
     servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
-    # Permitir reutilização do endereço/porta
+    # reutilização do endereço/porta
     servidor_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
-    # Aumentar o buffer de recepção para evitar perdas
+    # Aumenta o buffer de recepção para evitar perdas
     servidor_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 2**24)
     
     try:
         servidor_socket.bind((servidor_host, servidor_porta))
         
-        # Colocar o socket em modo de escuta
+        
         servidor_socket.listen(5)
         print(f"Servidor TCP iniciado em {servidor_host if servidor_host else '0.0.0.0'}:{servidor_porta}")
         print(f"Aguardando conexão... (O servidor fechará após {timeout_inativo} segundos de inatividade)")
         
-        # Configurar timeout para aceitar conexões
+        # timeout para aceitar conexões
         servidor_socket.settimeout(timeout_inativo)
         
-        # Inicializar contadores globais
+        # contadores globais
         total_pacotes_recebidos = 0
         total_bytes_recebidos = 0
         tempo_inicio_global = time.time()
@@ -32,18 +32,18 @@ def iniciar_servidor(servidor_host='', servidor_porta=12345, timeout_inativo=10)
             cliente_socket, endereco = servidor_socket.accept()
             print(f"Conexão estabelecida com {endereco}")
             
-            # Inicializar contadores 
+            # Inicializa contadores 
             pacotes_recebidos = 0
             bytes_recebidos = 0
             tempo_inicio = time.time()
             ultima_atividade = time.time()
             
-            # Configurar timeout para o socket do cliente
+            # Configura timeout para o socket do cliente
             cliente_socket.settimeout(timeout_inativo)
             
             while True:
                 try:
-                    # Receber o cabeçalho com o tamanho (8 bytes)
+                    # Recebe o cabeçalho com o tamanho (8 bytes)
                     header = b""
                     while len(header) < 8:
                         chunk = cliente_socket.recv(8 - len(header))
@@ -56,7 +56,7 @@ def iniciar_servidor(servidor_host='', servidor_porta=12345, timeout_inativo=10)
                         print("Cliente encerrou a conexão normalmente.")
                         break
                     
-                    # Converter o cabeçalho para obter o tamanho do pacote
+                    # Converte o cabeçalho para obter o tamanho do pacote
                     try:
                         tamanho_pacote = int(header.decode('utf-8'))
                     except ValueError:
@@ -68,7 +68,7 @@ def iniciar_servidor(servidor_host='', servidor_porta=12345, timeout_inativo=10)
                         print("Recebido pacote de finalização. Encerrando conexão.")
                         break
                     
-                    # Receber o pacote completo
+                    # Recebe o pacote completo
                     dados = b""
                     while len(dados) < tamanho_pacote:
                         chunk = cliente_socket.recv(min(65535, tamanho_pacote - len(dados)))
@@ -81,14 +81,14 @@ def iniciar_servidor(servidor_host='', servidor_porta=12345, timeout_inativo=10)
                         print("Pacote incompleto recebido. Encerrando conexão.")
                         break
                     
-                    # Atualizar contadores
+                
                     pacotes_recebidos += 1
                     total_pacotes_recebidos += 1
                     bytes_recebidos += len(dados)
                     total_bytes_recebidos += len(dados)
                     ultima_atividade = time.time()
                     
-                    # Processar os dados recebidos
+                    # Processando os dados recebidos
                     try:
                         mensagem = dados.decode('utf-8')
                         seq_num = mensagem.split('-')[0] if '-' in mensagem else 'N/A'
@@ -120,7 +120,7 @@ def iniciar_servidor(servidor_host='', servidor_porta=12345, timeout_inativo=10)
                     print(f"Erro na conexão com {endereco}: {e}")
                     break
             
-            # Exibir estatísticas desta conexão
+            
             tempo_conexao = time.time() - tempo_inicio
             print(f"\nConexão com {endereco} encerrada")
             print(f"Tempo de conexão: {tempo_conexao:.2f} segundos")
