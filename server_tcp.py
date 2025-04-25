@@ -96,7 +96,7 @@ def iniciar_servidor(servidor_host='', servidor_porta=12345, timeout_inativo=10)
                         # Exibir informações para cada pacote
                         print(f"Pacote #{pacotes_recebidos} (Seq: {seq_num}) de {endereco}: {len(dados)} bytes")
                         
-                        if pacotes_recebidos % 10 == 0:  # Mostra estatísticas a cada 10 pacotes
+                        if pacotes_recebidos % 5 == 0:  # Mostra estatísticas a cada 5 pacotes
                             tempo_atual = time.time()
                             tempo_decorrido = tempo_atual - tempo_inicio
                             taxa_bytes_por_segundo = bytes_recebidos / tempo_decorrido if tempo_decorrido > 0 else 0
