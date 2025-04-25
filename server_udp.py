@@ -25,9 +25,9 @@ def udp_server(host="0.0.0.0", port=5005):
                 server_socket.sendto("ACK:INFO".encode(), addr)
 
                 # Define um timeout para receber pacotes
-                server_socket.settimeout(5.0)
+                server_socket.settimeout(3.0)
 
-                # Contador real de pacotes recebidos
+                # Contador de pacotes recebidos
                 packets_received = 0
 
                 # Recebe os pacotes

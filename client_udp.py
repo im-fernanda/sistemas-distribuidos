@@ -16,7 +16,7 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
             f"Informações enviadas ao servidor: {n_packets} pacotes de {packet_size} bytes"
         )
 
-        # Espera pelo ACK da mensagem de informação
+        # Espera pelo ACK
         try:
             ack, _ = client_socket.recvfrom(1024)
             if ack.decode() == "ACK:INFO":
