@@ -45,9 +45,7 @@ def tcp_client(host="127.0.0.1", port=65432, n_packets=5, packet_size=1024):
 
         end_time = time.time()  # Termina o cronômetro
         total_time = end_time - start_time
-        data_transferred = (
-            n_packets * packet_size * 8 / 1e6
-        )  # Dados transferidos em Megabits
+        data_transferred = (n_packets * packet_size * 8 / 1e6)  # Dados transferidos em Megabits
         transmission_rate = data_transferred / total_time  # Taxa de transmissão em Mbps
 
         print(f"Taxa de transmissão: {transmission_rate:.2f} Mbps")

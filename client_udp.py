@@ -6,7 +6,7 @@ import json
 def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (host, port)
-    client_socket.settimeout(2.0)  # Define timeout para receber ACK
+    client_socket.settimeout(5.0)  # Define timeout para receber ACK
 
     try:
         info_message = f"INFO:{n_packets}:{packet_size}".encode()
@@ -86,4 +86,5 @@ def udp_client(host="127.0.0.1", port=5005, n_packets=5, packet_size=1024):
 
 
 if __name__ == "__main__":
-    udp_client(host="127.0.0.1", n_packets=5, packet_size=60000)
+    udp_client(host="127.0.0.1", n_packets=5, packet_size=1000)
+ 
