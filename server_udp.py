@@ -2,7 +2,6 @@ import socket
 
 
 def udp_server(host="0.0.0.0", port=5005):
-    # Criação do socket UDP
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_socket.bind((host, port))
 
@@ -10,7 +9,6 @@ def udp_server(host="0.0.0.0", port=5005):
 
     while True:
         try:
-            # Recebe o primeiro pacote que contém informações sobre N e T
             data, addr = server_socket.recvfrom(1024)
             info = data.decode().split(":")
 
@@ -21,63 +19,57 @@ def udp_server(host="0.0.0.0", port=5005):
                     f"Cliente {addr} vai enviar {n_packets} pacotes de tamanho {packet_size}"
                 )
 
-                # Envia ACK para o pacote de informação
                 server_socket.sendto("ACK:INFO".encode(), addr)
+                server_socket.settimeout(5.0)
 
-                # Define um timeout para receber pacotes
-                server_socket.settimeout(3.0)
-
-                # Contador de pacotes recebidos
                 packets_received = 0
+                seen_ids = set()
+                retransmissions_detected = 0
 
-                # Recebe os pacotes
                 try:
-                    for i in range(n_packets):
-                        packet_data, _ = server_socket.recvfrom(
-                            packet_size + 20
-                        )  # Buffer extra para o cabeçalho
+                    for _ in range(n_packets * 2):  # Permite mais tentativas para acomodar retransmissões
+                        packet_data, _ = server_socket.recvfrom(packet_size + 20)
 
-                        # Extrai o ID do pacote
                         header_end = packet_data.find(b":")
                         if header_end != -1:
                             packet_id = packet_data[:header_end].decode()
-                            data = packet_data[header_end + 1 :]
+                            data = packet_data[header_end + 1:]
 
-                            packets_received += 1
-                            print(
-                                f"Recebido pacote {packet_id}/{n_packets} de {addr} ({len(data)} bytes)"
-                            )
-                            # Tenta imprimir o conteúdo da mensagem
-                            try:
-
-                                message_content = data.decode("utf-8")
+                            if packet_id in seen_ids:
+                                retransmissions_detected += 1
+                                print(f"Retransmissão detectada do pacote {packet_id}")
+                            else:
+                                seen_ids.add(packet_id)
+                                packets_received += 1
                                 print(
-                                    f"Conteúdo do pacote {packet_id}: {message_content[:50]}..."
+                                    f"Recebido pacote {packet_id}/{n_packets} de {addr} ({len(data)} bytes)"
                                 )
-                            except UnicodeDecodeError:
-                                # Se não for texto decodificável, mostra os primeiros bytes
-                                print(
-                                    f"Conteúdo do pacote {packet_id} (bytes): {data[:20]}..."
-                                )
+                                try:
+                                    message_content = data.decode("utf-8")
+                                    print(
+                                        f"Conteúdo do pacote {packet_id}: {message_content[:50]}..."
+                                    )
+                                except UnicodeDecodeError:
+                                    print(
+                                        f"Conteúdo do pacote {packet_id} (bytes): {data[:20]}..."
+                                    )
 
-                            # Envia ACK para este pacote
                             ack_message = f"ACK:{packet_id}".encode()
                             server_socket.sendto(ack_message, addr)
+
+                        if packets_received == n_packets:
+                            break
 
                 except socket.timeout:
                     print(f"Timeout após receber {packets_received} pacotes")
 
                 finally:
-                    # Restaura o comportamento sem timeout
                     server_socket.settimeout(None)
 
-                    # Verifica se recebeu todos os pacotes prometidos
-                    if packets_received == n_packets:
-                        print(f"Todos os {n_packets} pacotes foram recebidos de {addr}")
-                    else:
-                        print(
-                            f"Recebidos apenas {packets_received}/{n_packets} pacotes de {addr}"
-                        )
+                    print(f"\nResumo da recepção:")
+                    print(f"Pacotes recebidos: {packets_received}/{n_packets}")
+                    print(f"Retransmissões detectadas: {retransmissions_detected}")
+                    print("Aguardando novo cliente...\n")
 
         except Exception as e:
             print(f"Erro: {e}")
