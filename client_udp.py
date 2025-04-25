@@ -104,8 +104,8 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
     print(f"Total de retransmissões: {total_retransmissoes}")
     print(f"Tempo médio de resposta: {tempo_medio:.2f}ms")
     print(f"Taxa de transferência: {taxa_bytes_por_segundo:.2f} B/s ({taxa_kb_por_segundo:.2f} KB/s)")
-    print(f"Taxa de transferência: {taxa_mbits_por_segundo:.2f} Mbps")
+    print(f"Taxa de transmissão: {taxa_mbits_por_segundo:.2f} Mbps")
     print("=" * 50)
 
 if __name__ == "__main__":
-    enviar_pacotes_udp(servidor_host='127.0.0.1', servidor_porta=12345, num_pacotes=5, tamanho_pacote=60*1024, max_retransmissoes=3, timeout=3)
+    enviar_pacotes_udp(servidor_host='127.0.0.1', servidor_porta=12345, num_pacotes=5, tamanho_pacote=60*1024, max_retransmissoes=3, timeout=5)
