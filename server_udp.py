@@ -1,79 +1,87 @@
 import socket
+import time
+import sys
 
-
-def udp_server(host="0.0.0.0", port=5005):
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_socket.bind((host, port))
-
-    print(f"Servidor UDP aguardando pacotes em {host}:{port}...")
-
-    while True:
-        try:
-            data, addr = server_socket.recvfrom(1024)
-            info = data.decode().split(":")
-
-            if len(info) == 3 and info[0] == "INFO":
-                n_packets = int(info[1])
-                packet_size = int(info[2])
-                print(
-                    f"Cliente {addr} vai enviar {n_packets} pacotes de tamanho {packet_size}"
-                )
-
-                server_socket.sendto("ACK:INFO".encode(), addr)
-                server_socket.settimeout(5.0)
-
-                packets_received = 0
-                seen_ids = set()
-                retransmissions_detected = 0
-
+def iniciar_servidor(servidor_host='', servidor_porta=12345, buffer_size=65535):
+    servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    
+    # Aumentar o buffer de recepção para evitar perdas
+    servidor_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 2**24)
+    
+    try:
+        # Associar o socket à porta
+        servidor_socket.bind((servidor_host, servidor_porta))
+        print(f"Servidor UDP iniciado em {servidor_host if servidor_host else '0.0.0.0'}:{servidor_porta}")
+        
+        # Inicializar contadores
+        pacotes_recebidos = 0
+        bytes_recebidos = 0
+        clientes = {}
+        tempo_inicio = time.time()
+        
+        # Loop para receber dados
+        while True:
+            try:
+                dados, endereco = servidor_socket.recvfrom(buffer_size)
+                
+                # Atualizar contadores
+                pacotes_recebidos += 1
+                bytes_recebidos += len(dados)
+                
+                
+                # Processar os dados recebidos
                 try:
-                    for _ in range(n_packets * 2):  # Permite mais tentativas para acomodar retransmissões
-                        packet_data, _ = server_socket.recvfrom(packet_size + 20)
+                    mensagem = dados.decode('utf-8')
+                    seq_num = mensagem.split('-')[0] if '-' in mensagem else 'N/A'
+                    # Exibir informações para cada pacote
+                    print(f"Pacote #{pacotes_recebidos} (Seq: {seq_num}) de {endereco}: {len(dados)} bytes")
 
-                        header_end = packet_data.find(b":")
-                        if header_end != -1:
-                            packet_id = packet_data[:header_end].decode()
-                            data = packet_data[header_end + 1:]
+                    if pacotes_recebidos % 10 == 0:  # Mostra estatísticas de taxa a cada 10 pacotes
+                        tempo_atual = time.time()
+                        tempo_decorrido = tempo_atual - tempo_inicio
+                        taxa_kb_por_segundo = (bytes_recebidos / 1024) / tempo_decorrido if tempo_decorrido > 0 else 0
+                        print(f"Taxa média: {taxa_kb_por_segundo:.2f} KB/s ({(taxa_kb_por_segundo*1024):.2f} B/s)")
+                except UnicodeDecodeError:
+                    print(f"Recebido pacote binário de {endereco}: {len(dados)} bytes")
+                
+                # Enviar resposta de confirmação
+                resposta = f"ACK:{seq_num}"
+                servidor_socket.sendto(resposta.encode('utf-8'), endereco)
+                
+            except ConnectionResetError:
+                print("Erro 10054: Conexão resetada pelo host remoto. Continuando...")
+                time.sleep(0.1)
+                continue
+                
+            except Exception as e:
+                print(f"Erro inesperado: {e}")
+                time.sleep(0.1)
+                continue
+                
+    except KeyboardInterrupt:
+        print("\nServidor encerrado pelo usuário.")
+        
 
-                            if packet_id in seen_ids:
-                                retransmissions_detected += 1
-                                print(f"Retransmissão detectada do pacote {packet_id}")
-                            else:
-                                seen_ids.add(packet_id)
-                                packets_received += 1
-                                print(
-                                    f"Recebido pacote {packet_id}/{n_packets} de {addr} ({len(data)} bytes)"
-                                )
-                                try:
-                                    message_content = data.decode("utf-8")
-                                    print(
-                                        f"Conteúdo do pacote {packet_id}: {message_content[:50]}..."
-                                    )
-                                except UnicodeDecodeError:
-                                    print(
-                                        f"Conteúdo do pacote {packet_id} (bytes): {data[:20]}..."
-                                    )
-
-                            ack_message = f"ACK:{packet_id}".encode()
-                            server_socket.sendto(ack_message, addr)
-
-                        if packets_received == n_packets:
-                            break
-
-                except socket.timeout:
-                    print(f"Timeout após receber {packets_received} pacotes")
-
-                finally:
-                    server_socket.settimeout(None)
-
-                    print(f"\nResumo da recepção:")
-                    print(f"Pacotes recebidos: {packets_received}/{n_packets}")
-                    print(f"Retransmissões detectadas: {retransmissions_detected}")
-                    print("Aguardando novo cliente...\n")
-
-        except Exception as e:
-            print(f"Erro: {e}")
-
+        tempo_total = time.time() - tempo_inicio
+        print("\n" + "=" * 50)
+        print("ESTATÍSTICAS DO SERVIDOR:")
+        print(f"Tempo de execução: {tempo_total:.2f} segundos")
+        print(f"Total de pacotes recebidos: {pacotes_recebidos}")
+        print(f"Total de bytes recebidos: {bytes_recebidos} ({bytes_recebidos/1024/1024:.2f} MB)")
+        
+        if tempo_total > 0:
+            taxa_kb_por_segundo = (bytes_recebidos / 1024) / tempo_total
+            taxa_bytes_por_segundo = taxa_kb_por_segundo * 1024
+            taxa_mbps = (bytes_recebidos * 8) / tempo_total / 1024 / 1024
+            
+            print(f"Taxa média de transferência: {taxa_kb_por_segundo:.2f} KB/s ({taxa_bytes_por_segundo:.2f} MB/s)")
+            print(f"Taxa média de transferência: {taxa_mbps:.2f} Mbps")
+        
+        print("=" * 50)
+    
+    finally:
+        servidor_socket.close()
 
 if __name__ == "__main__":
-    udp_server()
+
+    iniciar_servidor(servidor_host = '', servidor_porta = 12345, buffer_size=65535)
