@@ -15,9 +15,7 @@ def udp_server(host="0.0.0.0", port=5005):
             if len(info) == 3 and info[0] == "INFO":
                 n_packets = int(info[1])
                 packet_size = int(info[2])
-                print(
-                    f"Cliente {addr} vai enviar {n_packets} pacotes de tamanho {packet_size}"
-                )
+                print(f"Cliente {addr} vai enviar {n_packets} pacotes de tamanho {packet_size}")
 
                 server_socket.sendto("ACK:INFO".encode(), addr)
                 server_socket.settimeout(5.0)
@@ -27,7 +25,7 @@ def udp_server(host="0.0.0.0", port=5005):
                 retransmissions_detected = 0
 
                 try:
-                    for _ in range(n_packets * 2):  # Permite mais tentativas para acomodar retransmissões
+                    for _ in range(n_packets * 2):
                         packet_data, _ = server_socket.recvfrom(packet_size + 20)
 
                         header_end = packet_data.find(b":")
@@ -41,18 +39,13 @@ def udp_server(host="0.0.0.0", port=5005):
                             else:
                                 seen_ids.add(packet_id)
                                 packets_received += 1
-                                print(
-                                    f"Recebido pacote {packet_id}/{n_packets} de {addr} ({len(data)} bytes)"
-                                )
+                                print(f"Recebido pacote {packet_id}/{n_packets} de {addr} ({len(data)} bytes)")
+
                                 try:
                                     message_content = data.decode("utf-8")
-                                    print(
-                                        f"Conteúdo do pacote {packet_id}: {message_content[:50]}..."
-                                    )
+                                    print(f"Conteúdo do pacote {packet_id}: {message_content[:50]}...")
                                 except UnicodeDecodeError:
-                                    print(
-                                        f"Conteúdo do pacote {packet_id} (bytes): {data[:20]}..."
-                                    )
+                                    print(f"Conteúdo do pacote {packet_id} (bytes): {data[:20]}...")
 
                             ack_message = f"ACK:{packet_id}".encode()
                             server_socket.sendto(ack_message, addr)
@@ -65,7 +58,6 @@ def udp_server(host="0.0.0.0", port=5005):
 
                 finally:
                     server_socket.settimeout(None)
-
                     print(f"\nResumo da recepção:")
                     print(f"Pacotes recebidos: {packets_received}/{n_packets}")
                     print(f"Retransmissões detectadas: {retransmissions_detected}")
