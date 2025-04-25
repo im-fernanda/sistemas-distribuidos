@@ -9,14 +9,14 @@ def gerar_payload(tamanho):
     return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(tamanho))
 
 def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacote, max_retransmissoes=3, timeout=2):
-    # Criar o socket UDP
-    cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    cliente_socket.settimeout(timeout)  # Definir timeout em segundos
     
-    # Aumentar o buffer de envio
+    cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    cliente_socket.settimeout(timeout)  # em segundos
+    
+    # Aumenta o buffer de envio
     cliente_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 2**24)
     
-    # Inicializar métricas
+    
     pacotes_enviados = 0
     pacotes_recebidos = 0
     pacotes_perdidos = 0
@@ -24,10 +24,10 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
     tempos_resposta = []
     bytes_enviados = 0
     
-    # Gerar payload com o tamanho especificado (uma vez só para economizar processamento)
+    # Gera a mensagem com o tamanho especificado (uma vez só para economizar processamento)
     payload_base = gerar_payload(tamanho_pacote)
     
-    # Adicionar variável para armazenar o último número de sequência recebido
+    # Adiciona variável para armazenar o último número de sequência recebido
     ultimo_numero_sequencia = -1
     pacotes_fora_de_ordem = 0
     
@@ -47,12 +47,12 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
             try:
                 inicio = time.time()
                 
-                # Enviar dados para o servidor
+                # Envia os dados para o servidor
                 bytes_enviados_pacote = cliente_socket.sendto(payload.encode('utf-8'), (servidor_host, servidor_porta))
                 bytes_enviados += bytes_enviados_pacote
                 pacotes_enviados += 1
                 
-                # Receber resposta
+                # Receberesposta
                 dados, endereco = cliente_socket.recvfrom(1024)
                 resposta = dados.decode('utf-8')
                 
@@ -64,7 +64,7 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
                 pacotes_recebidos += 1
                 pacote_recebido = True
                 
-                # Verificar a ordem de chegada
+                # Verifica a ordem de chegada
                 if resposta.startswith('ACK:'):
                     numero_sequencia = int(resposta.split(':')[1])
                     if numero_sequencia <= ultimo_numero_sequencia:
@@ -89,14 +89,14 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
     
     tempo_total = time.time() - tempo_inicio_total
     
-    # Fechar o socket
+    # Fecha o socket
     cliente_socket.close()
     
-    # Calcular estatísticas
+    
     taxa_perda = (pacotes_perdidos / num_pacotes) * 100 if num_pacotes > 0 else 0
     tempo_medio = sum(tempos_resposta) / len(tempos_resposta) if tempos_resposta else 0
     
-    # Calcular taxa de transferência
+    
     bytes_total = bytes_enviados
     kb_total = bytes_total / 1024
     mb_total = kb_total / 1024
