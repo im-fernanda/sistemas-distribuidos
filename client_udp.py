@@ -27,6 +27,10 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
     # Gerar payload com o tamanho especificado (uma vez só para economizar processamento)
     payload_base = gerar_payload(tamanho_pacote)
     
+    # Adicionar variável para armazenar o último número de sequência recebido
+    ultimo_numero_sequencia = -1
+    pacotes_fora_de_ordem = 0
+    
     print(f"Iniciando envio de {num_pacotes} pacotes de {tamanho_pacote} bytes cada")
     print("-" * 50)
     
@@ -59,6 +63,17 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
                 print(f"Pacote {i+1}/{num_pacotes}: Enviado {bytes_enviados_pacote} bytes, recebido em {tempo_resposta:.2f}ms")
                 pacotes_recebidos += 1
                 pacote_recebido = True
+                
+                # Verificar a ordem de chegada
+                if resposta.startswith('ACK:'):
+                    numero_sequencia = int(resposta.split(':')[1])
+                    if numero_sequencia <= ultimo_numero_sequencia:
+                        pacotes_fora_de_ordem += 1
+                        print(f"Pacote {i+1}/{num_pacotes}: Chegou fora de ordem!")
+                    else:
+                        ultimo_numero_sequencia = numero_sequencia
+                else:
+                    print(f"Resposta inesperada: {resposta}")
                 
             except socket.timeout:
                 retransmissoes += 1
@@ -105,6 +120,7 @@ def enviar_pacotes_udp(servidor_host, servidor_porta, num_pacotes, tamanho_pacot
     print(f"Tempo médio de resposta: {tempo_medio:.2f}ms")
     print(f"Taxa de transferência: {taxa_bytes_por_segundo:.2f} B/s ({taxa_kb_por_segundo:.2f} KB/s)")
     print(f"Taxa de transmissão: {taxa_mbits_por_segundo:.2f} Mbps")
+    print(f"Pacotes fora de ordem: {pacotes_fora_de_ordem}")
     print("=" * 50)
 
 if __name__ == "__main__":
