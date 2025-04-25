@@ -5,38 +5,38 @@ import sys
 def iniciar_servidor(servidor_host='', servidor_porta=12345, buffer_size=65535):
     servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
-    # Aumentar o buffer de recepção para evitar perdas
+    # Aumenta o buffer de recepção para evitar perdas
     servidor_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 2**24)
     
     try:
-        # Associar o socket à porta
+        
         servidor_socket.bind((servidor_host, servidor_porta))
         print(f"Servidor UDP iniciado em {servidor_host if servidor_host else '0.0.0.0'}:{servidor_porta}")
         
-        # Inicializar contadores
+        
         pacotes_recebidos = 0
         bytes_recebidos = 0
         clientes = {}
         tempo_inicio = time.time()
         
-        # Loop para receber dados
+        # Loop para receber os dados
         while True:
             try:
                 dados, endereco = servidor_socket.recvfrom(buffer_size)
                 
-                # Atualizar contadores
+                
                 pacotes_recebidos += 1
                 bytes_recebidos += len(dados)
                 
                 
-                # Processar os dados recebidos
+                
                 try:
                     mensagem = dados.decode('utf-8')
                     seq_num = mensagem.split('-')[0] if '-' in mensagem else 'N/A'
                     # Exibir informações para cada pacote
                     print(f"Pacote #{pacotes_recebidos} (Seq: {seq_num}) de {endereco}: {len(dados)} bytes")
 
-                    if pacotes_recebidos % 10 == 0:  # Mostra estatísticas de taxa a cada 10 pacotes
+                    if pacotes_recebidos % 5 == 0:  # Mostra estatísticas de taxa a cada 5
                         tempo_atual = time.time()
                         tempo_decorrido = tempo_atual - tempo_inicio
                         taxa_kb_por_segundo = (bytes_recebidos / 1024) / tempo_decorrido if tempo_decorrido > 0 else 0
@@ -44,7 +44,7 @@ def iniciar_servidor(servidor_host='', servidor_porta=12345, buffer_size=65535):
                 except UnicodeDecodeError:
                     print(f"Recebido pacote binário de {endereco}: {len(dados)} bytes")
                 
-                # Enviar resposta de confirmação
+                # confirmação de recebimento 
                 resposta = f"ACK:{seq_num}"
                 servidor_socket.sendto(resposta.encode('utf-8'), endereco)
                 
