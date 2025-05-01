@@ -1,4 +1,4 @@
-# Sistemas Distribuídos - Comunicação TCP vs UDP
+<h1 align="center" style="font-weight: bold;">  Sistemas Distribuídos - Comunicação TCP vs UDP <h1>
 
 Este repositório contém uma implementação de um sistema cliente-servidor utilizando os protocolos TCP e UDP, com o objetivo de comparar o desempenho entre eles.
 
