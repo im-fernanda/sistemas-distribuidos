@@ -37,7 +37,17 @@ Este repositório contém uma implementação de um sistema cliente-servidor uti
 
 3. Em outro terminal, execute o cliente correspondente.
 
-### 📊 Resultados
-O gráfico gerado (grafico_mbps.jpg) apresenta uma comparação da taxa de transferência entre os protocolos TCP e UDP, permitindo analisar qual protocolo oferece melhor desempenho nas condições testadas.
+## 📊 Relatório Técnico
 
+O arquivo `Relatório.pdf` apresenta uma análise comparativa entre os protocolos TCP e UDP sob duas condições:
+
+- **Sem perda nem atraso (condições ideais)**:
+  - TCP e UDP apresentam desempenho semelhante, com o TCP superando ligeiramente para pacotes maiores.
+  - O gráfico mostra crescimento linear da taxa de transferência com o aumento do tamanho dos pacotes.
+
+- **Com perda e atraso simulados via Clumsy (1000ms de latência e 10% de perda)**:
+  - O desempenho do UDP é severamente impactado, quase nulo para pacotes pequenos.
+  - O TCP mantém desempenho crescente, demonstrando maior robustez mesmo sob condições adversas.
+
+> A conclusão do relatório reforça que a escolha entre TCP e UDP depende das características da aplicação e das condições da rede.
 
